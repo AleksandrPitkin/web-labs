@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="photoBrowserApp">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Browser</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow-y: scroll;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .thumbnail {
+      padding: 0;
+      margin: 10px;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .thumbnail.selected {
+      border: 2px solid red;
+    }
+
+    .main-image-container {
+      display: flex;
+      /* Updated to flex */
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    .scroll-btn {
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      cursor: pointer;
+      background-color: #333;
+      transition: all 0.3s ease;
+      border-radius: 5px;
+      background-image: linear-gradient(to right, #4b6cb7, #182848);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 18px;
+      /* Adjusted for visibility */
+    }
+
+    .scroll-btn:hover {
+      background-image: linear-gradient(to right, #182848, #4b6cb7);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-image {
+      max-width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 4px;
+      border: 2px solid #444;
+    }
+
+    .img-preview {
+      width: 100px;
+      height: 60px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    h1 {
+      color: #ffffff;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+  <script>
+    var app = angular.module('photoBrowserApp', []);
+    app.controller('PhotoBrowserController', function ($scope, $http) {
+      $scope.photos = [];
+      $scope.selectedPhotoIndex = 0;
+
+      $scope.fetchPhotos = function () {
+        $http.get('https://picsum.photos/v2/list?page=2&limit=18').then(function (response) {
+          $scope.photos = response.data;
+          $scope.selectedPhotoIndex = 0;
+        });
+      };
+
+      $scope.selectPhoto = function (index) {
+        $scope.selectedPhotoIndex = index;
+      };
+
+      $scope.scrollPhoto = function (direction) {
+        if (direction === 'left' && $scope.selectedPhotoIndex > 0) {
+          $scope.selectedPhotoIndex -= 1;
+        } else if (direction === 'right' && $scope.selectedPhotoIndex < $scope.photos.length - 1) {
+          $scope.selectedPhotoIndex += 1;
+        }
+      };
+
+      $scope.fetchPhotos();
+    });
+  </script>
+</head>
+
+<body ng-controller="PhotoBrowserController">
+  <div class="container">
+    <h1>Photo Browser</h1>
+    <div class="photo-grid">
+      <div class="thumbnail" ng-repeat="photo in photos" ng-click="selectPhoto($index)"
+        ng-class="{'selected': $index === selectedPhotoIndex}">
+        <img ng-src="{{photo.download_url}}" class="img-preview">
+      </div>
+    </div>
+    <div class="main-image-container">
+      <button class="scroll-btn prev" ng-click="scrollPhoto('left')">&lt; Prev</button>
+      <img ng-src="{{photos[selectedPhotoIndex].download_url}}" class="main-image">
+      <button class="scroll-btn next" ng-click="scrollPhoto('right')">Next &gt;</button>
+    </div>
+  </div>
+</body>
+
+</html>
